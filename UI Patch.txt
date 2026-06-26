@@ -1,0 +1,23 @@
+UI PATCH : Improved UI using Rich library 
+
+
+INSTALL DEPENDENCIES
+--------------------  
+
+Run this command in your terminal:
+   
+pip install rich
+
+
+OPENING IN VS CODE
+------------------
+
+Make sure the terminal is Maximized (Hide the side panel)
+
+
+
+Enjoy!
+
+
+
+
