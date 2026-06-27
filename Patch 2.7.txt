@@ -1,0 +1,7 @@
+Notes : Hugely improved 'self-evolving' capability, Improved UI, Improved Wisdom (Learns lessons), Unlimited Session Continuity (History fix), Improved Reflection Node (Focuses more on learning) 
+
+1. Remove everything inside .\brain\chroma_db folder (Not the folder itself)
+2. Remove CODER.v_2.6_UI
+3. Replace CODER.v_2.7_UI
+
+Enjoy! 
