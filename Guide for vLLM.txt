@@ -1,0 +1,94 @@
+===============================================================================
+DOCUMENT: ARCHITECTURAL GUIDE - OLLAMA TO vLLM
+PROJECT: CODER.v_2.7_UI (AUTONOMOUS AGENTIC ENGINE)
+===============================================================================
+
+We have reached the limits of what a local, monolithic inference setup can provide. 
+Ollama has served us well during the prototyping phase, but its architecture is 
+fundamentally designed for individual desktop use—it ties the model's lifecycle 
+directly to the agent's process. This creates a massive bottleneck.
+
+To build a truly professional-grade autonomous entity, we must decouple 
+intelligence from execution. We are moving toward a distributed architecture 
+where the CODER Agent acts as the "Cognitive Controller" (running on CPU/Logic) 
+and vLLM acts as the "Neural Engine" (running on high-performance GPU clusters).
+
+By adopting vLLM, we aren't just getting faster response times; 
+we are gaining access to PagedAttention and massive throughput capabilities. 
+We are moving from a single-user tool to an enterprise-ready cognitive service.
+
+The core of this migration is the transition from "Managing Models" to 
+"Consuming Services." 
+
+In our current state, the agent is responsible for knowing where models live 
+on a disk and how to trigger them. In the new state, the agent becomes a 
+sophisticated client. It will communicate with a dedicated inference server 
+via an industry-standard REST API. This allows us to scale our GPU resources 
+independently of the agent's code, enabling us to run multiple agentic loops 
+simultaneously without resource contention.
+
+IMPLEMENTATION ROADMAP:
+----------------------------------------------
+
+A. THE DISCOVERY LAYER (Refactoring RichUI)
+Currently, our UI relies on shell-level subprocess calls to 'ollama list'. This 
+is fragile and assumes the model is running on the same machine as the agent. 
+
+The Logic Change:
+We need to move toward a network-aware discovery system. The UI should perform 
+an HTTP GET request to the engine's models endpoint (typically '/v1/models'). 
+The implementation must parse this JSON response and dynamically build our 
+selection menu from the 'id' field of the returned objects. This makes the 
+agent "cluster-aware"—it doesn't care where the engine is, as long as it can 
+reach it over the network.
+
+B. THE COMMUNICATION PROTOCOL (Refactoring LLMInterface)
+Our reasoning loop currently uses a specialized Ollama integration. We need to 
+standardize this by adopting the OpenAI-compatible protocol, which vLLM 
+implements natively.
+
+The Logic Change:
+The internal LLM instance must be swapped for the 'ChatOpenAI' class within 
+the LangChain ecosystem. The critical engineering detail here is the 
+configuration of the 'base_url'. We are pointing the agent's "nervous system" 
+directly at our vLLM endpoint. By using this standard, we make the agent 
+future-proof; whether we use vLLM, TGI, or a cloud provider, the cognitive 
+logic remains untouched.
+
+C. THE DATA INTEGRITY LAYER (Handling Private Data Centers)
+In a secure, air-gapped environment, "calling home" to HuggingFace is not just 
+a latency issue—it's a security violation. We must ensure the engine is 
+completely self-contained.
+
+The Logic Change:
+We must shift from "Model IDs" to "Local Path Loading." Instead of telling 
+vLLM to fetch 'Llama-3', we will point it to a pre-staged directory containing 
+the weights (ideally in AWQ or GPTQ quantization for maximum speed). 
+
+Furthermore, the deployment command must enforce strict offline modes using 
+environment variables (TRANSFORMERS_OFFLINE=1). This guarantees that no 
+unauthorized outbound network requests are attempted during model initialization.
+
+PERFORMANCE TUNING & OPERATIONAL EXCELLENCE
+----------------------------------------------
+
+A high-performance engine is only as good as its configuration. To ensure 
+the CODER agent operates at peak efficiency, we must optimize the vLLM 
+startup parameters:
+
+1. VRAM Management: We should use '--gpu-memory-utilization' to carefully 
+   balance the memory allocated to the KV cache against the memory required 
+   for the model weights.
+2. Context Window Control: To prevent OOM (Out of Memory) errors during 
+   long reasoning chains, we must explicitly set '--max-model-len'. This 
+   ensures our agentic loops don't exceed the physical limits of our hardware.
+3. Quantization Strategy: For enterprise deployment, AWQ is our gold standard. 
+   It provides the high-speed inference required for real-time autonomous 
+   reasoning while significantly reducing the VRAM footprint.
+
+CONCLUSION
+----------------------------------------------
+We are moving away from "running a script" and toward "orchestrating 
+a system." This architecture provides the scale, security, and speed required 
+for true autonomous intelligence in a professional environment.
+
