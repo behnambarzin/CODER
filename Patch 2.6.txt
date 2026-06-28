@@ -1,7 +1,0 @@
-Notes : Improved Memory, Fixed Bugs, Upgraded Reflection Node
-
-1. Remove everything inside .\brain\chroma_db folder (Not the folder itself) (Restarts the memory)
-2. Remove CODER.v_2
-3. Replace CODER.v_2.6
-
-Enjoy! 
