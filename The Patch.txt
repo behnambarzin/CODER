@@ -1,0 +1,7 @@
+Notes : Figure it out
+
+1. Remove everything inside .\brain\chroma_db folder (Not the folder itself)
+2. Remove CODER.v_2.7_UI
+3. Replace CODER
+
+ 
