@@ -1,0 +1,3 @@
+change the name from CODER(macOS) to CODER
+setup_brain.py works on macOS
+fixed the toolbox, system prompt and some other stuff.
